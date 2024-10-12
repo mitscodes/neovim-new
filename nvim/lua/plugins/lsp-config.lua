@@ -13,7 +13,6 @@ return {
       "MasonLog",
       "MasonUpdate",
       "MasonUpdateAll",
-
     },
   },
   {
@@ -90,7 +89,6 @@ return {
             callback = function()
               vim.lsp.buf.format({ async = false })
             end,
-
           })
         end
       end
@@ -160,9 +158,6 @@ return {
       vim.api.nvim_create_autocmd("BufWritePre", {
         callback = organize_imports,
       })
-
     end,
   },
 }
-
-
