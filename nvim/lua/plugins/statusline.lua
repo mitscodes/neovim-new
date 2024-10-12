@@ -1,24 +1,31 @@
 return {
   "nvim-lualine/lualine.nvim",
-  event = "BufWinEnter", -- Lazy load on window enter
+
+  event = "BufWinEnter",
+
   dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
     require("lualine").setup({
       options = {
-        theme = "auto",      -- Matches current colorscheme
-        section_separators = "", -- Minimal separators
-
-        component_separators = "",
-
-        globalstatus = true, -- One status line for all windows
+        theme = "kanagawa", -- Sync with the Kanagawa colorscheme
+        section_separators = { left = "", right = "" }, -- Elegant separators
+        component_separators = { left = "", right = "" },
+        globalstatus = true,
+        disabled_filetypes = { "NvimTree", "alpha" }, -- Hide in specific buffers
       },
       sections = {
-        lualine_a = {}, -- Keep sections minimal
-        lualine_b = { "branch" },
+        lualine_a = {
+          {
+            "mode",
+            fmt = function(str)
+              return str:sub(1, 1)
+            end,
+          },
+        },                            -- Show single-letter mode
+        lualine_b = { "branch", "diff" }, -- Git branch and changes
         lualine_c = { "filename" },
-        lualine_x = { "encoding", "fileformat", "filetype" },
+        lualine_x = { { "diagnostics", sources = { "nvim_lsp" } }, "encoding", "filetype" },
         lualine_y = { "progress" },
-
         lualine_z = { "location" },
       },
       inactive_sections = {

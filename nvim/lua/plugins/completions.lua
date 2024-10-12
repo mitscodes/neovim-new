@@ -1,5 +1,4 @@
 return {
-  -- nvim-cmp for completions
   {
     "hrsh7th/nvim-cmp",
     event = "InsertEnter",
@@ -17,15 +16,13 @@ return {
     config = function()
       local cmp = require("cmp")
       require("luasnip.loaders.from_vscode").lazy_load()
-
-      -- Setup completion menu
       cmp.setup({
-
         snippet = {
           expand = function(args)
             require("luasnip").lsp_expand(args.body)
           end,
         },
+
         window = {
           completion = cmp.config.window.bordered(),
           documentation = cmp.config.window.bordered(),
@@ -38,14 +35,13 @@ return {
         }),
         formatting = {
           format = function(entry, item)
-            local menu_map = {
+            item.menu = ({
               nvim_lsp = "[LSP]",
               luasnip = "[Snippet]",
               buffer = "[Buffer]",
               path = "[Path]",
               copilot = "[Copilot]",
-            }
-            item.menu = menu_map[entry.source.name]
+            })[entry.source.name]
             return item
           end,
         },
@@ -53,30 +49,25 @@ return {
           { name = "nvim_lsp" },
           { name = "luasnip" },
           { name = "path" },
-
           { name = "copilot" },
         }, {
           { name = "buffer" },
         }),
       })
 
-      -- Command-line completion
+      -- Limit command-line completion to basic paths and commands
+      cmp.setup.cmdline(":", {
+        sources = {
+          { name = "path" },
+        },
+      })
       cmp.setup.cmdline("/", {
         sources = {
           { name = "buffer" },
         },
       })
 
-      cmp.setup.cmdline(":", {
-        sources = cmp.config.sources({
-
-          { name = "path" },
-        }, {
-          { name = "cmdline" },
-        }),
-      })
-
-      -- Custom highlight for Kanagawa theme
+      -- Custom highlight adjustments for Kanagawa theme
       vim.cmd([[
         highlight! CmpItemAbbr guibg=NONE guifg=#C8C093
         highlight! CmpItemAbbrMatch guibg=NONE guifg=#957FB8
@@ -87,8 +78,6 @@ return {
       ]])
     end,
   },
-
-  -- LuaSnip for snippets
   {
     "L3MON4D3/LuaSnip",
     event = "InsertEnter",
@@ -99,17 +88,12 @@ return {
       require("luasnip.loaders.from_vscode").lazy_load()
     end,
   },
-
-  -- LSP configuration for multiple languages
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
-
     config = function()
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
       local lspconfig = require("lspconfig")
-
-      -- Setup for various LSP servers
       local servers = {
         "pyright",
         "gopls",
@@ -130,10 +114,8 @@ return {
         "phpactor",
         "solargraph",
       }
-
       for _, server in ipairs(servers) do
         lspconfig[server].setup({
-
           capabilities = capabilities,
           on_attach = function(client, bufnr)
             local opts = { noremap = true, silent = true, buffer = bufnr }
