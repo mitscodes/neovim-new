@@ -1,6 +1,7 @@
 return {
   {
     "hrsh7th/nvim-cmp",
+
     event = "InsertEnter",
     dependencies = {
       "hrsh7th/cmp-nvim-lsp",
@@ -16,7 +17,10 @@ return {
     config = function()
       local cmp = require("cmp")
       require("luasnip.loaders.from_vscode").lazy_load()
+
+      -- Setup completion menu
       cmp.setup({
+
         snippet = {
           expand = function(args)
             require("luasnip").lsp_expand(args.body)
@@ -24,15 +28,22 @@ return {
         },
 
         window = {
-          completion = cmp.config.window.bordered(),
+          completion = {
+            border = "rounded",
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
+
+            max_height = 10, -- Limit height to fit 5-8 suggestions nicely
+          },
           documentation = cmp.config.window.bordered(),
         },
+
         mapping = cmp.mapping.preset.insert({
           ["<Tab>"] = cmp.mapping.select_next_item(),
           ["<S-Tab>"] = cmp.mapping.select_prev_item(),
           ["<C-Space>"] = cmp.mapping.complete(),
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
         }),
+
         formatting = {
           format = function(entry, item)
             item.menu = ({
@@ -45,55 +56,66 @@ return {
             return item
           end,
         },
+
         sources = cmp.config.sources({
+
           { name = "nvim_lsp" },
           { name = "luasnip" },
           { name = "path" },
           { name = "copilot" },
         }, {
-          { name = "buffer" },
+
+          { name = "buffer", max_item_count = 5 }, -- Limit buffer suggestions
         }),
       })
 
-      -- Limit command-line completion to basic paths and commands
+      -- Command-line completion (trimmed down)
       cmp.setup.cmdline(":", {
         sources = {
           { name = "path" },
         },
       })
+
       cmp.setup.cmdline("/", {
         sources = {
           { name = "buffer" },
         },
       })
 
-      -- Custom highlight adjustments for Kanagawa theme
+      -- Custom highlight tweaks for Kanagawa theme
       vim.cmd([[
         highlight! CmpItemAbbr guibg=NONE guifg=#C8C093
+
         highlight! CmpItemAbbrMatch guibg=NONE guifg=#957FB8
-        highlight! CmpItemAbbrMatchFuzzy guibg=NONE guifg=#957FB8
         highlight! CmpItemKindFunction guibg=NONE guifg=#DCA561
         highlight! CmpItemKindVariable guibg=NONE guifg=#DCD7BA
         highlight! CmpItemKindKeyword guibg=NONE guifg=#A3D4D5
       ]])
     end,
   },
+
+  -- Snippet Integration
   {
+
     "L3MON4D3/LuaSnip",
     event = "InsertEnter",
     dependencies = {
       "rafamadriz/friendly-snippets",
     },
+
     config = function()
       require("luasnip.loaders.from_vscode").lazy_load()
     end,
   },
+
+  -- LSP Config for multiple languages
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
       local lspconfig = require("lspconfig")
+
       local servers = {
         "pyright",
         "gopls",
@@ -104,8 +126,6 @@ return {
         "tailwindcss",
         "sumneko_lua",
         "ansiblels",
-        "asm_lsp",
-        "angularls",
         "sqls",
         "kotlin_language_server",
         "jdtls",
@@ -114,9 +134,11 @@ return {
         "phpactor",
         "solargraph",
       }
+
       for _, server in ipairs(servers) do
         lspconfig[server].setup({
           capabilities = capabilities,
+
           on_attach = function(client, bufnr)
             local opts = { noremap = true, silent = true, buffer = bufnr }
             vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
